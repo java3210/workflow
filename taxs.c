@@ -13,59 +13,50 @@ float calc_tax_th(int income) {
     return tax;
 }
 
-float calc_tax_sg(int income) {
-    float tax = 0;
-    if (income > 320000)       tax += (income - 320000) * 0.22, income = 320000;
-    if (income > 280000)       tax += (income - 280000) * 0.20, income = 280000;
-    if (income > 240000)       tax += (income - 240000) * 0.19, income = 240000;
-    if (income > 200000)       tax += (income - 200000) * 0.18, income = 200000;
-    if (income > 160000)       tax += (income - 160000) * 0.17, income = 160000;
-    if (income > 120000)       tax += (income - 120000) * 0.15, income = 120000;
-    if (income > 80000)        tax += (income - 80000)  * 0.11, income = 80000;
-    if (income > 40000)        tax += (income - 40000)  * 0.075, income = 40000;
-    if (income > 30000)        tax += (income - 30000)  * 0.035, income = 30000;
-    if (income > 20000)        tax += (income - 20000)  * 0.02;
-    return tax;
-}
-
-float calc_tax_jp(int income) {
-    float tax = 0;
-    if (income > 40000000)     tax += (income - 40000000) * 0.45, income = 40000000;
-    if (income > 18000000)     tax += (income - 18000000) * 0.40, income = 18000000;
-    if (income > 9000000)      tax += (income - 9000000) * 0.33, income = 9000000;
-    if (income > 6950000)      tax += (income - 6950000) * 0.23, income = 6950000;
-    if (income > 3300000)      tax += (income - 3300000) * 0.20, income = 3300000;
-    if (income > 1950000)      tax += (income - 1950000) * 0.10, income = 1950000;
-    if (income > 0)            tax += income * 0.05;
-    return tax;
-}
-
 int main() {
-    char code[3];
-    int monthly_income;
     int yearly_income;
     float tax = 0;
+    int deduction_choices[4] = {0};
+    int deduction_amounts[4] = {60000, 9000, 100000, 100000};
+    int total_deduction = 0;
+    int i;
+    char input[100];
 
-    printf("กรุณากรอกเลือกประเทศ (เช่น TH, SG, JP): ");
-    scanf("%2s", code);
+    printf("กรุณากรอกเงินรายปีของคุณ (บาท): ");
+    scanf("%d", &yearly_income);
 
-    printf("เงินรายเดือนของคุณ (บาท): ");
-    scanf("%d", &monthly_income);
-
-    yearly_income = monthly_income * 12;
-
-    if (strcmp(code, "TH") == 0)
-        tax = calc_tax_th(yearly_income);
-    else if (strcmp(code, "SG") == 0)
-        tax = calc_tax_sg(yearly_income);
-    else if (strcmp(code, "JP") == 0)
-        tax = calc_tax_jp(yearly_income);
-    else {
-        printf("ยังไม่มีข้อมูลภาษีสำหรับประเทศนี้\n");
-        return 1;
+    if (yearly_income < 150000) {
+        printf("รายได้ต่ำกว่า 150,000 บาท: ไม่มีภาษี\n");
+        return 0;
     }
 
+    printf("เลือกการลดหย่อนภาษี (พิมพ์เลขแล้วกด Enter เช่น 1 3 4):\n");
+    printf("1. ลดหย่อนส่วนตัว 60,000 บาท\n");
+    printf("2. ลดหย่อนประกันสังคม 9,000 บาท\n");
+    printf("3. ลดหย่อนประกันชีวิต 100,000 บาท\n");
+    printf("4. ลดหย่อนดอกเบี้ยบ้าน 100,000 บาท\n");
+    printf("กรุณาเลือก: ");
+
+    getchar();
+    fgets(input, sizeof(input), stdin);
+
+    for (i = 0; i < 4; i++) {
+        char choice_char = '1' + i;
+        if (strchr(input, choice_char) != NULL) {
+            deduction_choices[i] = 1;
+            total_deduction += deduction_amounts[i];
+        }
+    }
+
+    int taxable_income = yearly_income - total_deduction;
+    if (taxable_income < 0) taxable_income = 0;
+
+    tax = calc_tax_th(taxable_income);
+
     printf("รายได้ต่อปี: %d บาท\n", yearly_income);
-    printf("คุณต้องจ่ายภาษีประมาณ: %.2f บาท ต่อปี\n", tax);
+    printf("ลดหย่อนภาษีรวม: %d บาท\n", total_deduction);
+    printf("รายได้สุทธิหลังหักลดหย่อน: %d บาท\n", taxable_income);
+    printf("ภาษีที่ต้องจ่ายประมาณ: %.2f บาท ต่อปี\n", tax);
+
     return 0;
 }
